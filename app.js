@@ -1,16 +1,50 @@
-const express=require("express")
-const cors=require("cors")
-const mongoose=require("mongoose")
-const bcrypt=require("bcrypt")
-const jwt=require("jsonwebtoken")
+const Express = require("express")
+const Cors = require("cors")
+const Mongoose = require("mongoose")
+const Bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
+const userModel = require("./models/users")
 
 
-let app=express()
 
-app.get("/",(req,res)=>{
-    res.send("hello")
+let app = Express()
+app.use(Express.json())
+app.use(Cors())
+
+
+Mongoose.connect("mongodb+srv://karthika_35:karthika35@cluster0.aa1yfln.mongodb.net/BlogappDb?retryWrites=true&w=majority&appName=Cluster0")
+app.post("/signup", async (req, res) => {
+
+    let input = req.body
+    let hashedPassword = Bcrypt.hashSync(req.body.password, 10)
+    console.log(hashedPassword)
+    req.body.password = hashedPassword
+
+    userModel.find({ email: req.body.email }).then(
+        (items) => {
+
+            if (items.length > 0) {
+
+                res.json({ "status": "Email Id already exist" })
+
+            } else {
+
+                let result = new userModel(input)
+                result.save()
+                res.json({ "status": "success" })
+            }
+
+        }
+    ).catch(
+        (error) => { }
+    )
+
+
+
+
+
 })
 
-app.listen(3030,()=>{
+app.listen(3000, () => {
     console.log("Server running")
 })
